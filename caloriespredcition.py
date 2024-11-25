@@ -4,11 +4,15 @@ import pickle
 import numpy as np
 
 # Load the trained XGBoost model and scaler
-with open('Calories.pkl', 'rb') as model_file:
-    model = pickle.load(model_file)
+try:
+    with open('Calories.pkl', 'rb') as model_file:
+        model = pickle.load(model_file)
 
-with open('schr.pkl', 'rb') as scaler_file:
-    scaler = pickle.load(scaler_file)
+    with open('schr.pkl', 'rb') as scaler_file:
+        scaler = pickle.load(scaler_file)
+except FileNotFoundError:
+    st.error("Model or scaler file not found. Please ensure 'Calories.pkl' and 'schr.pkl' are in the same directory.")
+    st.stop()
 
 # Title of the web app
 st.title("Calories Burned Prediction App")
@@ -21,7 +25,7 @@ height = st.number_input("Height (cm)", min_value=50.0, max_value=250.0, value=1
 weight = st.number_input("Weight (kg)", min_value=20.0, max_value=200.0, value=70.0, step=0.1)
 duration = st.number_input("Duration of Exercise (minutes)", min_value=0.0, max_value=300.0, value=30.0, step=1.0)
 heart_rate = st.number_input("Heart Rate (bpm)", min_value=30.0, max_value=220.0, value=75.0, step=0.1)
-body_temp = st.number_input("Body Temperature (°C)", min_value=30.0, max_value=45.0, value=36.5, step=0.1)
+body_temp = st.number_input("Body Temperature (Â°C)", min_value=30.0, max_value=45.0, value=36.5, step=0.1)
 
 # Convert gender to numeric encoding
 gender_encoded = 0 if gender == "Male" else 1
@@ -40,6 +44,9 @@ if st.button("Predict Calories Burned"):
 
         # Display the result
         st.success(f"Predicted Calories Burned: {prediction[0]:,.2f} kcal")
+    except FileNotFoundError:
+        st.error("Model or scaler file not found.")
+    except ValueError:
+        st.error("Input data format mismatch. Please check the entered values.")
     except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-    
+        st.error(f"An unexpected error occurred: {str(e)}")
